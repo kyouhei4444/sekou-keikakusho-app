@@ -1,0 +1,29 @@
+# ---- 公開しないもの（社員名簿・協力会社・工事データ・PCごとの設定）
+# 見本は data/*.sample.json。画面で保存すると本物がここに作られる
+data/staff.json
+data/company.json
+projects/*.json
+settings.json
+
+# 社内の施工計画書雛形（前工事の氏名・数量が残っているので公開しない）
+施工計画書雛形/
+
+# ---- ビルド成果物
+_build/
+build/
+dist/
+release/
+*.spec.bak
+
+# ---- Python
+__pycache__/
+*.pyc
+
+# ---- テストが一時的に作るページ
+web/_test*.html
+
+# ---- OS・エディタ
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp

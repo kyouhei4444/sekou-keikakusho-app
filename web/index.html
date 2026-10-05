@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>施工計画書アプリ</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <h1>施工計画書アプリ</h1>
+  <div class="head-right">
+    <select id="projectPicker" title="保存した工事を開く"><option value="">― 保存した工事 ―</option></select>
+    <button id="btnSave" class="ghost">工事を保存</button>
+    <span id="busy" class="busy hide">処理中…</span>
+    <span id="excelState" class="state"></span>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="koji" class="on">1. 工事情報</button>
+  <button data-tab="taisei">2. 体制</button>
+  <button data-tab="komoku">3. 各項目</button>
+  <button data-tab="zumen">4. 設計書の取り込み・照査</button>
+  <button data-tab="shuturyoku">5. 出力</button>
+  <button data-tab="settei">設定</button>
+</nav>
+
+<main>
+<div id="warn" class="warnbox hide"></div>
+
+<!-- ============================================ 1. 工事情報 -->
+<section id="tab-koji" class="tab on">
+  <div class="grid">
+    <label class="wide">工事名
+      <input id="工事名" placeholder="貢川１工区河川工事（明許）（余フ）">
+    </label>
+    <label>発注者
+      <input id="発注者" list="dl-hacchusha" placeholder="山梨県 中北建設事務所">
+      <datalist id="dl-hacchusha"></datalist>
+    </label>
+    <label>課
+      <input id="発注者課" list="dl-ka" placeholder="河川砂防管理課">
+      <datalist id="dl-ka"></datalist>
+    </label>
+    <label class="wide">事業名
+      <input id="事業名" placeholder="公表用設計書の「事業名」欄（例：河川改修事業費）">
+    </label>
+    <label class="wide">工事場所
+      <input id="工事場所" placeholder="甲斐市竜王新町地内">
+    </label>
+    <label>設計書番号
+      <input id="設計書番号" placeholder="26-0356">
+    </label>
+    <label>工事略称<small>（5）（6）のファイル名に付きます</small>
+      <input id="工事略称" placeholder="貢川1工区">
+    </label>
+    <label>会社名
+      <input id="会社名">
+    </label>
+    <label>工期（自）
+      <input id="工期自" type="date">
+    </label>
+    <label>工期（至）
+      <input id="工期至" type="date">
+    </label>
+    <label class="wide">出力先フォルダー
+      <span class="row">
+        <input id="出力先" placeholder="（工事フォルダー）\施工計画書">
+        <button id="btnPickOut" class="ghost">選ぶ</button>
+      </span>
+      <small id="kouki表示" class="hint"></small>
+    </label>
+    <label class="wide">工事概要<small>（1）工事概要に入ります。1行1項目・最大6行</small>
+      <textarea id="工事概要" rows="6" placeholder="護岸工事　L=55.9m&#10;コンクリートブロック積工　L=25.1m　H=3.4m　A=95.2m2&#10;仮設工　一式"></textarea>
+    </label>
+  </div>
+</section>
+
+<!-- ============================================ 2. 体制 -->
+<section id="tab-taisei" class="tab">
+  <h2>自社の体制<small>ドロップダウンは社員名簿から。名簿は「設定」タブで増やせます</small></h2>
+  <div class="grid">
+    <label>現場代理人 <select id="現場代理人" class="staff"></select></label>
+    <label>現場代理人 TEL <input id="現場代理人TEL" placeholder="名簿にあれば自動"></label>
+    <label>監理(主任)技術者 <select id="主任技術者" class="staff"></select></label>
+    <label>主任技術者 TEL <input id="主任技術者TEL" placeholder="名簿にあれば自動"></label>
+    <label>事務担当 <select id="事務担当" class="staff"></select></label>
+    <label>品質管理担当 <select id="品質管理担当" class="staff"></select></label>
+    <label>出来形管理担当 <select id="出来形管理担当" class="staff"></select></label>
+    <label>工程管理担当 <select id="工程管理担当" class="staff"></select></label>
+    <label>安全管理担当 <select id="安全管理担当" class="staff"></select></label>
+  </div>
+
+  <h3>社内検査員（4名）</h3>
+  <div class="grid g4">
+    <label>1 <select id="社内検査員1" class="staff"></select></label>
+    <label>2 <select id="社内検査員2" class="staff"></select></label>
+    <label>3 <select id="社内検査員3" class="staff"></select></label>
+    <label>4 <select id="社内検査員4" class="staff"></select></label>
+  </div>
+
+  <h3>安全管理組織（（9）安全管理）</h3>
+  <div class="grid">
+    <label>統括安全衛生責任者 <select id="統括安全衛生責任者" class="staff"></select></label>
+    <label>安全管理者 <select id="安全管理者" class="staff"></select></label>
+    <label>衛生管理者 <select id="衛生管理者" class="staff"></select></label>
+    <label>安全巡視員 <select id="安全巡視員" class="staff"></select></label>
+    <label>火気取締責任者 <select id="火気取締責任者" class="staff"></select></label>
+    <label>電気取扱責任者 <select id="電気取扱責任者" class="staff"></select></label>
+    <label>車両取扱責任者 <select id="車両取扱責任者" class="staff"></select></label>
+    <label>機械取扱責任者 <select id="機械取扱責任者" class="staff"></select></label>
+    <label>作業指揮者① 名称 <input id="作業指揮者1名称" placeholder="玉掛け　作業指揮者"></label>
+    <label>作業指揮者① <select id="作業指揮者1" class="staff"></select></label>
+    <label>作業指揮者② 名称 <input id="作業指揮者2名称" placeholder="地山掘削"></label>
+    <label>作業指揮者② <select id="作業指揮者2" class="staff"></select></label>
+  </div>
+
+  <h3>緊急時の役割（（10）緊急時の体制及び対応）</h3>
+  <div class="grid">
+    <label>事故対策指揮者 <select id="事故対策指揮者" class="staff"></select></label>
+    <label>被災者の救出係 <select id="被災者救出係" class="staff"></select></label>
+    <label>事故現場指揮者 <select id="事故現場指揮者" class="staff"></select></label>
+    <label>現場交通管理係 <select id="現場交通管理係" class="staff"></select></label>
+    <label>事故原因調査係 <select id="事故原因調査係" class="staff"></select></label>
+    <label>情報連絡係 <select id="情報連絡係" class="staff"></select></label>
+    <label>災害対策係 <select id="災害対策係" class="staff"></select></label>
+  </div>
+
+  <h3>監督員（発注者）<small>未定なら空欄のままで結構です（表紙が空欄になります）</small></h3>
+  <table class="tbl" id="tbl-kantoku">
+    <thead><tr><th style="width:12rem">役職</th><th>氏名</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>委託業者<small>（3）現場組織表に載るのは1件目だけ。2件目以降は（10）の構成会社に載ります</small></h3>
+  <table class="tbl" id="tbl-itaku">
+    <thead><tr><th style="width:12rem">種別</th><th>会社</th><th style="width:12rem">担当</th><th style="width:10rem">電話</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>下請業者<small>最大5社。空いた枠は枠だけ残ります</small></h3>
+  <table class="tbl" id="tbl-shitauke">
+    <thead><tr><th style="width:16rem">工種</th><th>会社</th><th style="width:12rem">担当</th><th style="width:10rem">電話</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <datalist id="dl-kaisha"></datalist>
+</section>
+
+<!-- ============================================ 3. 各項目 -->
+<section id="tab-komoku" class="tab">
+  <h2>作る項目</h2>
+  <div id="itemList" class="chips"></div>
+  <small class="hint">（1）工事概要・（1-2）工事内容・（5）主要機械・（6）主要資材は、
+    「設計書の取り込み」タブで見積参考資料を読み取ると選べるようになります。
+    （7）施工方法・（8）施工管理計画は判断が要るのでこのアプリでは作りません。</small>
+
+  <h3>（4）指定機械</h3>
+  <label class="inline"><input type="checkbox" id="指定機械あり"> 指定機械がある（特記仕様書に条項がある）</label>
+  <label class="wide">記載内容
+    <input id="指定機械文言" placeholder="チェックを入れないと「…において指定機械はありません。」になります" disabled>
+  </label>
+
+  <h3>（9）安全管理の方針（4行）</h3>
+  <div class="grid g1">
+    <label>1 <input id="安全方針1"></label>
+    <label>2 <input id="安全方針2"></label>
+    <label>3 <input id="安全方針3"></label>
+    <label>4 <input id="安全方針4"></label>
+  </div>
+
+  <h3>（11）交通管理 — 搬出先</h3>
+  <table class="tbl" id="tbl-hanshutsu">
+    <thead><tr><th style="width:9rem">種類</th><th>処分先</th><th>所在地</th><th style="width:12rem">運搬距離</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <small class="hint">未定のときは「（処分先決定後に記入）」と入れておくと、空欄との区別が付きます。</small>
+
+  <h3>（13）現場作業環境の整備 — 実施する項目</h3>
+  <small class="hint">特記仕様書の現場環境改善費を確認し、実施する内容にチェック（通常は合計5つ）。</small>
+  <div id="kankyoList" class="kankyo"></div>
+</section>
+
+<!-- ============================================ 4. 設計図書 -->
+<section id="tab-zumen" class="tab">
+  <h2>設計書の取り込み・照査<small>見積参考資料から、工種・数量（1）（1-2）と 機械・資材（5）（6）を読み取り、ついでに設計照査（資料どうしの照合）も行います</small></h2>
+  <div class="row">
+    <input id="zumenFolder" placeholder="設計図書が入っているフォルダー">
+    <button id="btnPickZumen" class="ghost">選ぶ</button>
+    <button id="btnScan">判別する</button>
+  </div>
+  <div id="scanResult"></div>
+
+  <div id="parseArea" class="hide">
+    <h3>読み取った工種・数量<small>誤りはその場で直せます。行の削除は「除」をチェック</small></h3>
+    <div class="row">
+      <button id="btnMakeNaiyou">（1）工事概要・（1-2）工事内容を作る</button>
+      <span id="parseInfo" class="hint"></span>
+    </div>
+    <div class="tblwrap"><table class="tbl" id="tbl-rows">
+      <thead><tr><th style="width:3rem">除</th><th style="width:5rem">階層</th><th>名称</th><th style="width:16rem">規格</th><th style="width:8rem">数量</th><th style="width:6rem">単位</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+
+  <div id="tankaArea" class="hide">
+    <h3>施工単価表から拾った 機械・資材<small>台数と設計数量は単価表に出ないので入力してください</small></h3>
+    <div class="row">
+      <button id="btnMakeKikai">（5）主要機械・（6）主要資材を作る</button>
+      <span id="tankaInfo" class="hint"></span>
+    </div>
+    <h4>機械</h4>
+    <div class="tblwrap"><table class="tbl" id="tbl-kikai">
+      <thead><tr><th style="width:3rem">除</th><th>機械名</th><th style="width:14rem">規格</th><th style="width:4rem">単位</th><th style="width:5rem">台数</th><th style="width:14rem">工種</th><th style="width:4rem">低騒音</th><th style="width:4rem">排ガス</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <h4>資材</h4>
+    <div class="tblwrap"><table class="tbl" id="tbl-zairyo">
+      <thead><tr><th style="width:3rem">除</th><th>品名</th><th style="width:14rem">規格</th><th style="width:4rem">単位</th><th style="width:6rem">設計数量</th><th style="width:12rem">摘要（工種）</th><th style="width:15rem">数量の根拠</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <small class="hint">
+      数量は<b>明細書をたどって</b>出しています（本工事費内訳書 → 工種明細書 → 科目明細書 → 施工単価表）。
+      「何単位あたりの行か」を根拠欄に出しているので、そこに倍率をかけた合計が設計数量です。<br>
+      <b>※印</b>の行は、施工単価表が「代表機労材」だけで数量が無いため、
+      <b>その工種の数量</b>を入れてあります（材料そのものの数量ではありません）。<br>
+      図面の標準数量表・数量計算書にしかない材料（水抜きパイプ・目地材など）は拾えないので、あとから足してください。
+      不要な行は「除」で外してください。
+    </small>
+  </div>
+
+  <div id="shousaArea" class="hide">
+    <h3>設計照査（資料どうしの照合）<small>指摘は「要確認」の候補です。元の資料で確かめ、誤検出は「除」で外してください</small></h3>
+    <div class="row">
+      <button id="btnMakeShousa">設計照査結果（Excel）を作る</button>
+      <button id="btnRedoShousa" class="ghost">照査をやり直す</button>
+      <span id="shousaInfo" class="hint"></span>
+    </div>
+    <div class="tblwrap"><table class="tbl" id="tbl-shousa">
+      <thead><tr><th style="width:3rem">除</th><th style="width:4.5rem">重要度</th><th style="width:10rem">照査区分</th><th style="width:13rem">対象</th><th>内容</th><th style="width:14rem">資料・ページ</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div id="shousaChecked" class="hint"></div>
+    <small class="hint">
+      根拠：土木工事共通仕様書［令和7年10月］1-1-1-3「設計図書の照査」（p.1-5）、建設工事請負契約約款 第18条第1項（第1号〜第5号）。<br>
+      アプリが照合できるのは<b>資料の文字どうし</b>（第1号〜第3号の一部）です。図面の中身と現地条件（第4号・第5号）は、
+      Excel の「照査チェックリスト」シートで確かめてください。
+      甲斐市など県以外の発注者の工事は、その発注者の契約約款・仕様書で照査の扱いを確かめてください。
+    </small>
+  </div>
+</section>
+
+<!-- ============================================ 5. 出力 -->
+<section id="tab-shuturyoku" class="tab">
+  <h2>出力</h2>
+  <div class="row">
+    <button id="btnBuild" class="primary">施工計画書を作る</button>
+    <label class="inline"><input type="checkbox" id="verify" checked> 確認用のPDF・画像も作る</label>
+    <button id="btnOpenFolder" class="ghost">出力先を開く</button>
+  </div>
+  <div id="buildState" class="hint"></div>
+  <pre id="log"></pre>
+  <div id="shots"></div>
+</section>
+
+<!-- ============================================ 設定 -->
+<section id="tab-settei" class="tab">
+  <h2>フォルダーの場所</h2>
+  <div class="grid g1">
+    <label>施工計画書雛形 <span class="row"><input id="set-雛形"><button class="ghost pick" data-for="set-雛形">選ぶ</button></span></label>
+    <label>建設工事必携 <span class="row"><input id="set-必携"><button class="ghost pick" data-for="set-必携">選ぶ</button></span></label>
+    <label>工事フォルダーの親 <span class="row"><input id="set-親"><button class="ghost pick" data-for="set-親">選ぶ</button></span></label>
+  </div>
+  <button id="btnSaveSettings">保存</button>
+
+  <h2>社員名簿<small>ここに足すと、組織表のドロップダウンの選択肢が増えます</small></h2>
+  <table class="tbl" id="tbl-staff">
+    <thead><tr><th>氏名</th><th style="width:12rem">電話</th><th style="width:4rem"></th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <button id="btnAddStaff" class="ghost">行を足す</button>
+  <button id="btnSaveStaff">名簿を保存</button>
+
+  <h2>協力会社</h2>
+  <table class="tbl" id="tbl-kyoryoku">
+    <thead><tr><th>会社</th><th style="width:10rem">担当</th><th style="width:10rem">電話</th><th>得意工種</th><th style="width:4rem"></th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <button id="btnAddKyoryoku" class="ghost">行を足す</button>
+  <button id="btnSaveKyoryoku">協力会社を保存</button>
+</section>
+
+</main>
+<div id="fp" class="modal hide">
+  <div class="modal-box">
+    <h3 style="margin:0">フォルダーを選ぶ</h3>
+    <div class="row">
+      <input id="fp-path" spellcheck="false" placeholder="パスを直接入力してもかまいません">
+      <button id="fp-open" class="ghost">移動</button>
+      <button id="fp-up" class="ghost">上へ</button>
+    </div>
+    <div id="fp-drives" class="chips"></div>
+    <div id="fp-list" class="fp-list"></div>
+    <div class="row">
+      <span id="fp-msg" class="hint"></span>
+      <span style="flex:1"></span>
+      <button id="fp-cancel" class="ghost">キャンセル</button>
+      <button id="fp-ok">このフォルダーにする</button>
+    </div>
+    <small class="hint">無いフォルダー名を書いた場合は、作成時に自動で作られます。</small>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

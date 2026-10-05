@@ -1,0 +1,48 @@
+# タグ（v で始まる）を push すると、Windows で exe をビルドして GitHub のリリースに zip を載せる。
+#   git tag v2026.10.05
+#   git push origin v2026.10.05
+# 手動でビルドだけ試すときは Actions タブの「Run workflow」（成果物は Artifacts に入る）。
+#
+# 社内の施工計画書雛形は公開しないので、zip には入らない。雛形は exe の隣に各自で置く。
+
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 依存ライブラリ
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+
+      - name: exe のビルドと zip
+        shell: pwsh
+        run: ./build_release.ps1 -Version "${{ github.ref_name }}"
+
+      - name: 成果物を保存（手動実行用）
+        uses: actions/upload-artifact@v4
+        with:
+          name: sekou-keikakusho-app
+          path: release/*.zip
+
+      - name: リリースに載せる
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.zip
+          generate_release_notes: true
