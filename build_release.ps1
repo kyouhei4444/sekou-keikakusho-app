@@ -4,14 +4,14 @@ GitHub Actions（.github/workflows/release.yml）もこのスクリプトを使�
 
   powershell -ExecutionPolicy Bypass -File build_release.ps1 -Version v2026.10.05
 
-  # 社内配布用に雛形を同梱する（公開リポジトリのリリースには入れない）
+  # 別の雛形を同梱する（既定はリポジトリの「施工計画書雛形（山梨県）」）
   powershell -ExecutionPolicy Bypass -File build_release.ps1 -Version v2026.10.05 -Templates "C:\…\施工計画書雛形"
 
 出力：release\sekou-keikakusho-app-<Version>.zip
   施工計画書アプリ\
     施工計画書アプリ.exe
     engine\  data\  web\  projects\  README.md
-    施工計画書雛形\        … -Templates を指定したときだけ
+    施工計画書雛形\        … 既定はリポジトリの「施工計画書雛形（山梨県）」（個人情報を抜いた公開用）
 
 ※ このファイルは UTF-8（BOM 付き）で保存すること。BOM が無いと Windows PowerShell 5.1 が日本語を読み違える。
 #>
@@ -51,11 +51,11 @@ Copy-Item -Recurse (Join-Path $root 'data\templates') (Join-Path $dataOut 'templ
 New-Item -ItemType Directory -Force (Join-Path $stage 'projects') | Out-Null
 Copy-Item (Join-Path $root 'README.md') $stage
 
-if ($Templates) {
-    if (-not (Test-Path $Templates)) { throw "雛形フォルダーが見つかりません: $Templates" }
-    Copy-Item -Recurse $Templates (Join-Path $stage '施工計画書雛形')
-    Write-Output '  雛形を同梱しました（社内配布用。公開しないこと）'
-}
+# exe の隣に「施工計画書雛形」として置くと、アプリが自動で雛形フォルダーに選ぶ
+if (-not $Templates) { $Templates = Join-Path $root '施工計画書雛形（山梨県）' }
+if (-not (Test-Path $Templates)) { throw "雛形フォルダーが見つかりません: $Templates" }
+Copy-Item -Recurse $Templates (Join-Path $stage '施工計画書雛形')
+Write-Output "  雛形を同梱しました: $Templates"
 
 # zip は Python で作る（PowerShell 5.1 の Compress-Archive は日本語のファイル名が化けることがある）
 $zip = Join-Path $rel ("sekou-keikakusho-app-$Version.zip")

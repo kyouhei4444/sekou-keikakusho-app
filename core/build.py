@@ -9,6 +9,18 @@ from . import config, excel, util
 PLACEHOLDER = re.compile(r'^\{([^{}]+)\}$')
 
 
+def sheet_names(path):
+    """雛形のシート名。読めなければ None（＝確かめずに Excel に任せる）。"""
+    try:
+        if path.lower().endswith('.xlsx'):
+            import openpyxl
+            return openpyxl.load_workbook(path, read_only=True).sheetnames
+        import xlrd
+        return xlrd.open_workbook(path, on_demand=True).sheet_names()
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------- 差し込み値
 def make_values(prj):
     """工事データから {…} の置き換え表を作る。無い値は None（＝セルを消す）。"""
@@ -135,8 +147,15 @@ def build(prj, ids=None, log=print, verify=True):
             continue
         copies.append({'src': src, 'dst': dst})
         made.append(f)
+        # 雛形によってはシート構成が違う（例：山梨県版の（11）に「過積載防止２」「残土（2）」が無い）。
+        # 無いシートへの差し込みはとばして、ほかは作る。シート番号指定（int）は確かめない
+        have = sheet_names(src)
 
         for e in f.get('edits', []):
+            sh = e.get('sheet')
+            if have is not None and isinstance(sh, str) and sh not in have:
+                log('  ! %s に「%s」シートが無いので、そこへの差し込みはとばします' % (f['file'], sh))
+                continue
             cells = {}
             for addr, tpl in (e.get('cells') or {}).items():
                 cells[addr] = resolve(tpl, values)
