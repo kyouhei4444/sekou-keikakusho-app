@@ -36,6 +36,13 @@ Write-Output '■ exe をビルドしています（1分ほど）'
     sekou-keikakusho-app.spec
 if ($LASTEXITCODE -ne 0) { throw "PyInstaller が失敗しました（終了コード $LASTEXITCODE）" }
 
+Write-Output '■ exe を自己点検しています（PDF 読み取りなど）'
+$exe = Join-Path $rel 'build\sekou-keikakusho-app.exe'
+$p = Start-Process -FilePath $exe -ArgumentList '--selftest' -NoNewWindow -Wait -PassThru `
+    -RedirectStandardOutput (Join-Path $rel 'selftest.txt')
+Get-Content (Join-Path $rel 'selftest.txt') -Encoding UTF8 | Write-Output
+if ($p.ExitCode -ne 0) { throw "exe の自己点検に失敗しました（終了コード $($p.ExitCode)）。ライブラリの版を確かめてください" }
+
 Write-Output '■ 配布フォルダーを組み立てています'
 Copy-Item (Join-Path $rel 'build\sekou-keikakusho-app.exe') (Join-Path $stage '施工計画書アプリ.exe')
 foreach ($d in 'engine', 'web') {

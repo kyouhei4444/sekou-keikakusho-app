@@ -111,6 +111,7 @@ function checkSetup() {
   const msgs = [];
   if (!INIT.settings.雛形フォルダー) msgs.push('施工計画書雛形フォルダーが見つかりません。「設定」で場所を指定してください。');
   if (!INIT.excel.ok) msgs.push('Excel が見つかりません。Excel（デスクトップ版）が入っているパソコンで使ってください。');
+  if (INIT.pdf) msgs.push(INIT.pdf + '。設計書の取り込みと設計照査は使えません（配布元に連絡してください）。');
   if (!msgs.length) { w.classList.add('hide'); return; }
   w.innerHTML = '';
   w.appendChild(el('span', { text: msgs.join(' / ') }));

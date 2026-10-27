@@ -1,3 +1,5 @@
-pymupdf>=1.24
+# pymupdf は版を固定する。1.28.5 は PyInstaller で exe にすると読み込めなかった（2026-10-27）。
+# 上げるときは build_release.ps1 の自己点検（--selftest）が通ることを確かめる。
+pymupdf==1.28.2
 openpyxl>=3.1
 xlrd>=2.0

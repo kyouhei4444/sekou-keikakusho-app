@@ -38,7 +38,7 @@ except Exception:
 JOB = {'running': False, 'log': [], 'result': None, 'error': None, 'title': ''}
 JOB_LOCK = threading.Lock()
 CRLF = chr(13) + chr(10)
-VERSION = '2026-10-27a'   # 画面右上に出す版。配布物の取り違え防止
+VERSION = '2026-10-27b'   # 画面右上に出す版。配布物の取り違え防止
 
 # 雛形への差し込みではなく、設計書から読み取った明細で作る項目。
 # 「作る項目」タブにも並べたいので、template_map.json とは別にここで定義する。
@@ -188,6 +188,7 @@ def api_init():
                            if x.endswith('.json')),
         'phase2': soukatsu is not None and kikaishizai is not None,
         'shousa': shousa is not None,
+        'pdf': pdf_status(),
         'version': VERSION,
     }
 
@@ -240,6 +241,48 @@ def build_shousa(prj, body, files, warns):
     except Exception as e:
         warns.append('設計照査結果 の作成に失敗：%s' % e)
         jlog('  ! %s' % e)
+
+
+def pdf_status():
+    """PDF 読み取り（pymupdf）が使えるか。使えないときは理由の文字列。"""
+    if soukatsu is None:
+        return '設計書の取り込み機能が読み込めていません'
+    if getattr(soukatsu, 'pymupdf', None) is None:
+        return 'PDF 読み取りライブラリ（pymupdf）が読み込めていません'
+    return ''
+
+
+def selftest():
+    """配布前の自己点検（build_release.ps1 が exe に対して実行する）。問題があれば終了コード 1。"""
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+    ng = []
+    st = pdf_status()
+    if st:
+        ng.append(st)
+        try:
+            import pymupdf  # noqa: F401  理由を出すため、もう一度読み込んでみる
+        except Exception as e:
+            ng.append('pymupdf: %r' % e)
+    for name in ('openpyxl', 'xlrd'):
+        try:
+            __import__(name)
+        except Exception as e:
+            ng.append('%s: %r' % (name, e))
+    if shousa is None or kikaishizai is None:
+        ng.append('設計照査・機械資材の機能が読み込めていません')
+    if not ng:
+        try:
+            import pymupdf
+            doc = pymupdf.open()
+            doc.new_page().insert_text((72, 72), 'selftest')
+            assert 'selftest' in doc[0].get_text()
+        except Exception as e:
+            ng.append('PDF の読み書きに失敗: %r' % e)
+    print('selftest: ' + ('OK' if not ng else 'NG ' + ' / '.join(ng)))
+    return 0 if not ng else 1
 
 
 def api_build(body):
@@ -471,4 +514,6 @@ def main():
 
 
 if __name__ == '__main__':
+    if '--selftest' in sys.argv:
+        sys.exit(selftest())
     main()
