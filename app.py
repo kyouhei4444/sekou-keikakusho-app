@@ -38,7 +38,7 @@ except Exception:
 JOB = {'running': False, 'log': [], 'result': None, 'error': None, 'title': ''}
 JOB_LOCK = threading.Lock()
 CRLF = chr(13) + chr(10)
-VERSION = '2026-10-05b'   # 画面右上に出す版。配布物の取り違え防止
+VERSION = '2026-10-27a'   # 画面右上に出す版。配布物の取り違え防止
 
 # 雛形への差し込みではなく、設計書から読み取った明細で作る項目。
 # 「作る項目」タブにも並べたいので、template_map.json とは別にここで定義する。

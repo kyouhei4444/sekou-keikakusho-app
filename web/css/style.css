@@ -9,6 +9,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:1rem;
   padding:.6rem 1.2rem;background:var(--panel);border-bottom:1px solid var(--line)}
 header h1{font-size:1.05rem;margin:0;letter-spacing:.04em}
 .head-right{display:flex;align-items:center;gap:.5rem}
+.head-right button,.head-right .state{white-space:nowrap}
 .state{font-size:.8rem;color:var(--muted)}
 .busy{font-size:.8rem;color:#fff;background:var(--accent);border-radius:999px;padding:.1rem .7rem}
 @keyframes pulse{50%{opacity:.45}}
@@ -112,3 +113,6 @@ h4{font-size:.85rem;margin:.9rem 0 .3rem;color:#43506b}
 #tbl-shousa tr.ng td{background:#fdf1f0}
 #tbl-shousa td{vertical-align:top}
 #shousaChecked{margin:.5rem 0}
+
+/* .warnbox の display:flex が .hide より後にあるため、隠す指定を明示する */
+.warnbox.hide{display:none}
